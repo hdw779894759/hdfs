@@ -1,7 +1,5 @@
-package com.imooc.hadoop.hadooptrain;
+package com.imooc.hadoop;
 
-import lombok.Data;
-import lombok.extern.slf4j.Slf4j;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.*;
 import org.apache.hadoop.io.IOUtils;
@@ -16,11 +14,9 @@ import java.net.URI;
 /**
  * Hadoop HDFS JAVA api操作
  */
-@Data
-@Slf4j
 public class HDFSApp {
 
-    public static final String HDFS_PATH = "hdfs://192.168.2.127:8020";
+    public static final String HDFS_PATH = "hdfs://192.168.2.106:8020";
 
     FileSystem fileSystem = null;
     Configuration configuration = null;

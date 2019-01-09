@@ -1,0 +1,3 @@
+hello docker
+hello hadoop
+hello hadoop madreduce

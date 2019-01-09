@@ -12,7 +12,7 @@
     </annotationProcessing>
     <bytecodeTargetLevel>
       <module name="hadoop-train" target="1.8" />
-      <module name="hdfs" target="1.8" />
+      <module name="hdfs" target="6" />
     </bytecodeTargetLevel>
   </component>
 </project>

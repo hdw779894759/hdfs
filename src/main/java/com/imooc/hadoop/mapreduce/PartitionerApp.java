@@ -1,11 +1,13 @@
 package com.imooc.hadoop.mapreduce;
 
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.Mapper;
+import org.apache.hadoop.mapreduce.Partitioner;
 import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
@@ -15,7 +17,7 @@ import java.io.IOException;
 /**
  * 使用MapReduce开发WordCount应用程序
  */
-public class WordCountApp {
+public class PartitionerApp {
 
 
     /**
@@ -45,10 +47,9 @@ public class WordCountApp {
             // 按照指定分隔符【空格】进行拆分
             String[] words = line.split(" ");
 
-            for (String word : words) {
-                // 通过上下文把map的处理结果进行输出
-                context.write(new Text(word),one);
-            }
+            // 品牌
+            context.write(new Text(words[0]), new LongWritable(Long.parseLong(words[1])));
+
         }
     }
 
@@ -82,6 +83,29 @@ public class WordCountApp {
         }
     }
 
+    public static class MyPartitioner extends Partitioner<Text, LongWritable> {
+
+        /**
+         *
+         * @param key
+         * @param longWritable
+         * @param numPartitions
+         * @return
+         */
+        @Override
+        public int getPartition(Text key, LongWritable longWritable, int numPartitions) {
+            if (key.toString().equals("xiaomi")) {
+                return 0;
+            }
+            if (key.toString().equals("huawei")) {
+                return 1;
+            }
+            if (key.toString().equals("iphone7")) {
+                return 2;
+            }
+            return 3;
+        }
+    }
 
     /**
      * 定义Driver：封装了MapReduce作业的所有信息
@@ -91,37 +115,40 @@ public class WordCountApp {
         // 创建Configuration
         Configuration configuration = new Configuration();
 
+        // 准备清理已经存在的输出目录
+        Path outPutPath = new Path(args[1]);
+        FileSystem fileSystem = FileSystem.get(configuration);
+        if (fileSystem.exists(outPutPath)) {
+            fileSystem.delete(outPutPath, true);
+            System.out.println("output file exists,but is has deleted");
+        }
         // 创建Job
         Job job = Job.getInstance(configuration, "wordcount");
 
         // 设置job的处理类
-        job.setJarByClass(WordCountApp.class);
+        job.setJarByClass(PartitionerApp.class);
 
         // 设置作业处理的输入路径
         FileInputFormat.setInputPaths(job, new Path(args[0]));
 
         // 设置map相关参数
         job.setMapperClass(MyMapper.class);
-        job.setMapOutputKeyClass(Text.class);// 设置输出键的类型:文本数据信息
+        job.setMapOutputKeyClass(Text.class); // 设置输出键的类型:文本数据信息
         job.setMapOutputValueClass(LongWritable.class); // 输出值得类型:值
 
-        //设置reduce相关参数
+        // 设置reduce相关参数
         job.setReducerClass(MyReducer.class);
-        job.setOutputKeyClass(Text.class);// 处理结果的键的类型:文本数据信息
+        job.setOutputKeyClass(Text.class); // 处理结果的键的类型:文本数据信息
         job.setOutputValueClass(LongWritable.class); // 处理结果的值得类型:值
 
-        // 通过job设置Combiner处理类，起始逻辑上和我们的reduce是一样的
-        job.setCombinerClass(MyReducer.class);
+        // 设置job的partitioner
+        job.setPartitionerClass(MyPartitioner.class);
+        job.setNumReduceTasks(4); // 设置4个reducer，每个分区一个
 
-        //设置作业处理的输出路径
+        // 设置作业处理的输出路径
         FileOutputFormat.setOutputPath(job, new Path(args[1]));
 
         System.exit(job.waitForCompletion(true)?0:1);
 
-
-
     }
-
-
-
 }

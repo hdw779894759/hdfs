@@ -1,0 +1,7 @@
+xiaomi 200
+xiaomi 300
+huawei 500
+iphone7 500
+xiaomi 100
+sanxing 600
+iphone7 400

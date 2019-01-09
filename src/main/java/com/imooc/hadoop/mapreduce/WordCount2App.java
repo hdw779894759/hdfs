@@ -1,6 +1,7 @@
 package com.imooc.hadoop.mapreduce;
 
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
@@ -15,7 +16,7 @@ import java.io.IOException;
 /**
  * 使用MapReduce开发WordCount应用程序
  */
-public class WordCountApp {
+public class WordCount2App {
 
 
     /**
@@ -91,11 +92,18 @@ public class WordCountApp {
         // 创建Configuration
         Configuration configuration = new Configuration();
 
+        // 准备清理已经存在的输出目录
+        Path outPutPath = new Path(args[1]);
+        FileSystem fileSystem = FileSystem.get(configuration);
+        if (fileSystem.exists(outPutPath)) {
+            fileSystem.delete(outPutPath, true);
+            System.out.println("output file exists,but is has deleted");
+        }
         // 创建Job
         Job job = Job.getInstance(configuration, "wordcount");
 
         // 设置job的处理类
-        job.setJarByClass(WordCountApp.class);
+        job.setJarByClass(WordCount2App.class);
 
         // 设置作业处理的输入路径
         FileInputFormat.setInputPaths(job, new Path(args[0]));
@@ -109,9 +117,6 @@ public class WordCountApp {
         job.setReducerClass(MyReducer.class);
         job.setOutputKeyClass(Text.class);// 处理结果的键的类型:文本数据信息
         job.setOutputValueClass(LongWritable.class); // 处理结果的值得类型:值
-
-        // 通过job设置Combiner处理类，起始逻辑上和我们的reduce是一样的
-        job.setCombinerClass(MyReducer.class);
 
         //设置作业处理的输出路径
         FileOutputFormat.setOutputPath(job, new Path(args[1]));

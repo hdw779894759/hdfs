@@ -86,7 +86,6 @@ public class HDFSApp {
                 new FileInputStream(
                         new File("/Users/hdw/Desktop/Transform/jdk-8u181-linux-x64.tar.gz")));
         FSDataOutputStream fsDataOutputStream = fileSystem.create(new Path("/hdfsapi/test/jdk-8u181-linux-x64.tar.gz"), new Progressable() {
-            @Override
             public void progress() {
                 System.out.print(".");//带进度提醒信息
             }

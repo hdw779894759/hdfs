@@ -1,0 +1,3 @@
+spring:
+  hadoop:
+    fs-uri: hdfs://hadoop000:8020
